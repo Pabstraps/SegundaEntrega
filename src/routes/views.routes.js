@@ -1,46 +1,25 @@
 import { Router } from 'express';
-import { productsModel } from '../services/models/products.js';
+import productsModel from '../services/models/products.js'
 
 const router = Router();
 
 // Ruta para mostrar todos los productos con paginación
-router.get('/products', async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+router.get('/products/', async (req, res) => {
 
-        // Calcular el índice de inicio y el límite de productos a mostrar
-        const startIndex = (page - 1) * limit;
-        const endIndex = page * limit;
+        let page = parseInt(req.query.page);
+        // let limit = parseInt(req.query.limit);
+        if (!page) page = 1
+        let result = await productsModel.paginate({}, { page, limit: 4, lean: true })
+    
+        result.prevLink = result.hasPrevPage ? `http://localhost:8080/views/products?page=${result.prevPage}` : '';
+        result.nextLink = result.hasNextPage ? `http://localhost:8080/views/products?page=${result.nextPage}` : '';
+    
+        result.isValid = !(page < 1 || page > result.totalPages)
 
-        // Obtener la cantidad total de productos
-        const totalProducts = await productsModel.countDocuments({});
+        res.render('viewProducts', result);
 
-        // Obtener los productos de la página actual
-        const products = await productsModel.find().limit(limit).skip(startIndex);
-
-        // Paginación
-        const pagination = {};
-        if (endIndex < totalProducts) {
-            pagination.next = {
-                page: page + 1,
-                limit: limit
-            }
-        }
-
-        if (startIndex > 0) {
-            pagination.prev = {
-                page: page - 1,
-                limit: limit
-            }
-        }
-
-        res.render('products', { products, pagination });
-    } catch (error) {
-        console.error("Error al obtener productos con paginación: " + error);
-        res.status(500).send({ error: "Error al obtener productos con paginación", message: error });
-    }
 });
+
 
 // Ruta para mostrar detalles de un producto específico
 router.get('/products/:pid', async (req, res) => {

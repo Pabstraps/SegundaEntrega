@@ -1,0 +1,41 @@
+{{#if isValid}}
+<div>
+    {{#each docs}}
+    <div>
+        <h1>Titulo: {{this.title}}</h1>
+        <p>Descipcion: {{this.description}}</p>
+        <p>Categoria: {{this.category}}</p>
+        <p>SKU: {{this.code}}</p>
+        <p>Precio: {{this.price}}</p>
+        <p>Disponibles: {{this.stock}}</p>
+    <form action="/api/cart/{{cartId}}/products" method="POST">
+        <input type="hidden" name="productId" value="{{this._id}}">
+        <button type="submit">Agregar al carrito</button>
+    </form>
+
+    </div>
+    <br />
+    {{/each}}
+</div>
+<br />
+
+<div>
+    {{#if hasPrevPage}}
+    <a href={{this.prevLink}}>
+        << Anterior </a>
+            {{/if}}
+
+            {{!-- numero de pagina --}}
+            &nbsp;
+            {{this.page}}
+            &nbsp;
+
+            {{#if hasNextPage}}
+            <a href={{this.nextLink}}>
+                Siguiente >> </a>
+            {{/if}}
+
+</div>
+{{else}}
+<h1>No hay productos para mostrar</h1>
+{{/if}}

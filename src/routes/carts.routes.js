@@ -3,6 +3,19 @@ import { cartsModel } from '../services/models/carts.js';
 
 const router = Router();
 
+
+router.get('/', async (req, res) => {
+    try {
+        let cart = await cartsModel.find();
+        res.send({ result: "success", payload: cart })
+    } catch (error) {
+        console.error("No se pudo cargar el carrito: " + error);
+        res.status(500).send({ error: "No se pudo cargar el carrito", message: error });
+    }
+})
+
+
+
 // POST - Crear un carrito
 router.post('/', async (req, res) => {
     try {
@@ -14,6 +27,32 @@ router.post('/', async (req, res) => {
         res.status(500).send({ error: "No se pudo guardar el carrito con Mongoose", message: error });
     }
 });
+
+// POST - Agregar un producto al carrito
+router.post('/:cid/products', async (req, res) => {
+    try {
+        const { cid } = req.params;
+        const { productId } = req.body;
+
+        // Buscar el carrito por su ID
+        let cart = await cartsModel.findById(cid);
+        if (!cart) {
+            return res.status(404).send({ error: "Carrito no encontrado" });
+        }
+
+        // Agregar el producto al carrito
+        cart.products.push({ productId });
+
+        // Guardar la actualización del carrito en la base de datos
+        await cart.save();
+        
+        res.status(200).send({ status: "success", message: "Producto agregado al carrito" });
+    } catch (error) {
+        console.error("Error al agregar producto al carrito: " + error);
+        res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
+    }
+});
+
 
 // PUT - Actualizar un carrito
 router.put('/:id', async (req, res) => {

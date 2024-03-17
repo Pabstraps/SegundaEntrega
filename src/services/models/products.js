@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2'
 
 const collectionName = 'Productos';
-
 const stringTypeSchemaUniqueRequired = {
     type: String,
     unique: true,
@@ -26,4 +26,7 @@ const productScheme = new mongoose.Schema({
     }
 });
 
-export const productsModel = mongoose.model(collectionName, productScheme);
+productScheme.plugin(mongoosePaginate)
+
+const productsModel = mongoose.model(collectionName, productScheme);
+export default productsModel;

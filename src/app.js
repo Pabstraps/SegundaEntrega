@@ -6,6 +6,8 @@ import handlebars from 'express-handlebars';
 import mongoose from 'mongoose'
 import viewsRoutes from '../src/routes/views.routes.js'; 
 
+import productsModel from './services/models/products.js';
+
 
 const app = express();
 
@@ -18,7 +20,7 @@ app.set('view engine','handlebars');
 app.use(express.static(__dirname+'/public'))
 
 
-app.use('/products', viewsRoutes);
+app.use("/views", viewsRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/cart", cartsRoutes);
 
@@ -31,6 +33,9 @@ const connectMongoDB = async ()=>{
     try {
         await mongoose.connect('mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0');
         console.log("Conectado con exito a MongoDB usando Moongose.");
+
+        let products = await productsModel.paginate({ productsModel }, { limit: 5, page: 3})
+        console.log (products)
 
     } catch (error) {
         console.error("No se pudo conectar a la BD usando Moongose: " + error);

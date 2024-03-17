@@ -8,16 +8,20 @@
 </head>
 <body>
     <h1>Detalles del Producto</h1>
-    <h2>{{product.title}}</h2>
-    <p>Descripción: {{product.description}}</p>
-    <p>Precio: ${{product.price}}</p>
-    <p>Categoría: {{product.category}}</p>
-    <button onclick="addToCart('{{product._id}}')">Agregar al carrito</button>
-
+    <div>
+        <h2>{{product.title}}</h2>
+        <p>Descripción: {{product.description}}</p>
+        <p>Categoría: {{product.category}}</p>
+        <p>Código SKU: {{product.code}}</p>
+        <p>Precio: {{product.price}}</p>
+        <p>Stock Disponible: {{product.stock}}</p>
+        <button onclick="addToCart('{{product._id}}')">Agregar al carrito</button>
+    </div>
     <script>
         function addToCart(productId) {
-            // Aquí puedes implementar la lógica para agregar el producto al carrito
-            alert("Producto agregado al carrito: " + productId);
+            // Implementar lógica para agregar el producto al carrito
+            // Puedes utilizar AJAX o enviar una solicitud POST al endpoint correspondiente
+            console.log('Producto agregado al carrito:', productId);
         }
     </script>
 </body>

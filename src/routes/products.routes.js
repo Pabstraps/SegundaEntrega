@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { productsModel } from '../services/models/products.js'
+import productsModel from '../services/models/products.js'
 
 // import fs from 'fs';
 // import __dirname from '../utils.js'

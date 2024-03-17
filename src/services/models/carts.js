@@ -20,7 +20,10 @@ const CartScheme = new mongoose.Schema({
     code: stringTypeSchemaNonUniqueRequired,
     price: stringTypeSchemaNonUniqueRequired,
     stock: stringTypeSchemaNonUniqueRequired,
-    category: stringTypeSchemaNonUniqueRequired
+    category: {
+        type: "string",
+        enum: ["software","hardware","accesories"],
+    }
 });
 
 export const cartsModel = mongoose.model(collectionName, CartScheme);
