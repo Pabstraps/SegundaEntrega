@@ -16,7 +16,7 @@ router.get('/products/', async (req, res) => {
     
         result.isValid = !(page < 1 || page > result.totalPages)
 
-        res.render('viewProducts', result);
+        res.render('viewProducts', result, );
 
 });
 

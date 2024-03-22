@@ -1,8 +1,12 @@
 {{#if isValid}}
 <div>
     {{#each docs}}
+    <h1>Bienvenido! {{user.name}} </h1>
+
+    <h2>Lista de productos:</h2>
+
     <div>
-        <h1>Titulo: {{this.title}}</h1>
+        <h3>Titulo: {{this.title}}</h3>
         <p>Descipcion: {{this.description}}</p>
         <p>Categoria: {{this.category}}</p>
         <p>SKU: {{this.code}}</p>
