@@ -11,9 +11,12 @@ form.addEventListener('submit', e => {
         headers: {
             'Content-Type': 'application/json'
         }
-    }).then(result => {
-        if (result.status === 200) {
-            window.location.replace('/views/products');
+    }).then(result=>{
+        if(result.status===200){
+            window.location.replace('/users');
+        } else if (result.status === 401){
+            console.log(result);
+            alert("Login invalido revisa tus credenciales!");
         }
     })
 })

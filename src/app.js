@@ -8,8 +8,9 @@ import handlebars from 'express-handlebars';
 import mongoose from 'mongoose'
 import mongoStore from 'connect-mongo'
 import session from 'express-session'
-import viewsRoutes from '../src/routes/views.routes.js'; 
-
+import viewsRoutes from '../src/routes/views.routes.js';
+import passport from 'passport';
+import initializePassport from './config/passport.config.js';
 import productsModel from './services/models/products.js';
 
 const MONGO_URL = "mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0'"
@@ -42,6 +43,11 @@ app.use("/users", usersViewRoutes);
 app.use("/api/sessions", sessionsRoutes);
 
 
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 
 const SERVER_PORT = 8080;
 app.listen(8080, () => {
@@ -65,12 +71,3 @@ const connectMongoDB = async ()=>{
 connectMongoDB();
 
 
-
-
-// app.get('/ping', (req, res) => {
-//     console.log(__dirname);
-//     res.send({ status: "ok" })
-// })
-// app.listen(PORT, () => {
-//     console.log(`Server run on port ${PORT}`);
-// })
