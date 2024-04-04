@@ -2,17 +2,10 @@ import mongoose from 'mongoose';
 
 const collectionName = 'Cart';
 
-const stringTypeSchemaUniqueRequired = {
-    type: String,
-    unique: true,
-    required: true
-};
-
 const stringTypeSchemaNonUniqueRequired = {
     type: String,
     required: true
 };
-
 
 const CartScheme = new mongoose.Schema({
     title: stringTypeSchemaNonUniqueRequired,
@@ -23,7 +16,8 @@ const CartScheme = new mongoose.Schema({
     category: {
         type: "string",
         enum: ["software","hardware","accesories"],
-    }
+    },
+    products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }] // Referencia a los productos completos
 });
 
 export const cartsModel = mongoose.model(collectionName, CartScheme);

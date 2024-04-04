@@ -107,16 +107,54 @@ import productsModel from '../services/models/products.js'
 
 const router = Router();
 
+// // GET
+// router.get('/', async (req, res) => {
+//     try {
+//         let products = await productsModel.find();
+//         res.send({ result: "success", payload: products })
+//     } catch (error) {
+//         console.error("No se pudo obtener usuarios con moongose: " + error);
+//         res.status(500).send({ error: "No se pudo obtener usuarios con moongose", message: error });
+//     }
+// })
+
 // GET
 router.get('/', async (req, res) => {
     try {
-        let products = await productsModel.find();
-        res.send({ result: "success", payload: products })
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; // Cambia el límite según tus necesidades
+        const skip = (page - 1) * limit;
+
+        // Obtener la cantidad total de productos
+        const totalProducts = await productsModel.countDocuments();
+
+        // Calcular el total de páginas
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        // Obtener los productos para la página actual
+        const products = await productsModel.find().skip(skip).limit(limit);
+
+        // Configurar los enlaces para la paginación
+        const prevPage = page > 1 ? page - 1 : null;
+        const nextPage = page < totalPages ? page + 1 : null;
+
+        // Devolver la respuesta con el formato específico
+        res.send({
+            status: "success",
+            payload: products,
+            total_pages: totalPages,
+            current_page: page,
+            prev_page: prevPage,
+            next_page: nextPage,
+            has_prev_page: prevPage !== null,
+            has_next_page: nextPage !== null
+        });
     } catch (error) {
-        console.error("No se pudo obtener usuarios con moongose: " + error);
-        res.status(500).send({ error: "No se pudo obtener usuarios con moongose", message: error });
+        console.error("No se pudo obtener usuarios con mongoose: " + error);
+        res.status(500).send({ error: "No se pudo obtener usuarios con mongoose", message: error });
     }
-})
+});
+
 
 // POST
 router.post('/', async (req, res) => {

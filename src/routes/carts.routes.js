@@ -53,6 +53,22 @@ router.post('/:cid/products', async (req, res) => {
     }
 });
 
+// GET - Obtener un carrito con todos los productos completos
+router.get('/:cid', async (req, res) => {
+    try {
+        const { cid } = req.params;
+        const cart = await cartsModel.findById(cid).populate('products');
+        if (!cart) {
+            return res.status(404).send({ error: "Carrito no encontrado" });
+        }
+        res.send({ result: "success", payload: cart });
+    } catch (error) {
+        console.error("Error al obtener el carrito con los productos completos: " + error);
+        res.status(500).send({ error: "Error al obtener el carrito con los productos completos", message: error });
+    }
+});
+
+
 
 // PUT - Actualizar un carrito
 router.put('/:id', async (req, res) => {
