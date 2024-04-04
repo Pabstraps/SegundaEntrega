@@ -3,7 +3,8 @@ import __dirname from '../src/utils.js'
 import productsRoutes from '../src/routes/products.routes.js'
 import cartsRoutes from '../src/routes/carts.routes.js'
 import usersViewRoutes from './routes/users.view.routes.js';
-import sessionsRoutes from './routes/sessions.routes.js' 
+import sessionsRoutes from './routes/sessions.routes.js'
+import githubloginViewRouter from './routes/github-login.views.routes.js'
 import handlebars from 'express-handlebars';
 import mongoose from 'mongoose'
 import mongoStore from 'connect-mongo'
@@ -41,6 +42,7 @@ app.use("/api/products", productsRoutes);
 app.use("/api/cart", cartsRoutes);
 app.use("/users", usersViewRoutes);
 app.use("/api/sessions", sessionsRoutes);
+app.use("/github",githubloginViewRouter)
 
 
 initializePassport();

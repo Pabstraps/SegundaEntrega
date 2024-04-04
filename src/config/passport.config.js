@@ -1,11 +1,53 @@
 import passport from 'passport';
 import local from 'passport-local';
 import userModel from '../services/models/user.model.js'
+import gitHubStrategy from 'passport-github2';
 import { createHash, isValidPassword } from '../utils.js';
 
 const localStrategy = local.Strategy
-
 const initializePassport = () =>{
+
+                    //Github//
+    passport.use('github', new gitHubStrategy(
+        {
+            clientID: 'Iv1.719185e5f04f99f4',
+            clientSecret: 'b68d0be0d7a6a6ade9d5292f4305d73a5384eb32',
+            callbackUrl: 'http://localhost:8080/api/sessions/githubcallback'
+
+        }, async (accessToken, refreshToken, profile, done) =>{
+            console.log("Se obtuvo el perfil de usuario:");
+            console.log(profile);
+            try {
+                const user = await userModel.findOne({ email: profile._json.email });
+                console.log("Usuario encontrado para login:");
+                console.log(user);
+
+                if (!user) {
+                    console.warn("User doesn't exists with username: " + profile._json.email);
+
+                    let newUser = {
+                        first_name: profile._json.name,
+                        last_name: '',
+                        age: 18,
+                        email: profile._json.email,
+                        password: '',
+                        loggedBy: 'GitHub'
+                    }
+                    const result = await userModel.create(newUser)
+                    return done(null, result)
+                } else {
+                    //Si entramos por acá significa que el usuario ya existía.
+                    return done(null, user)
+                }
+            } catch (error) {
+                return done (error)
+            }
+        }
+    ))
+
+
+
+                     //Local//
 
     passport.use("register", new localStrategy(
         { passReqToCallback: true, usernameField: 'email' },
