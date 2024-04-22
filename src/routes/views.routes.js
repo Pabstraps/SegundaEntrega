@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import productsModel from '../services/models/products.js';
-import {cartsModel} from '../services/models/carts.js'; // Importa el modelo de carritos
+import productsModel from '../models/product.model.js';
+import cartsModel from '../models/cart.model.js'; 
 
 const router = Router();
 
-// Ruta para mostrar todos los productos con paginación
 router.get('/products/', async (req, res) => {
     try {
         let page = parseInt(req.query.page);
@@ -20,7 +19,6 @@ router.get('/products/', async (req, res) => {
     }
 });
 
-// Ruta para mostrar detalles de un producto específico
 router.get('/products/:pid', async (req, res) => {
     try {
         const product = await productsModel.findById(req.params.pid);
@@ -34,17 +32,16 @@ router.get('/products/:pid', async (req, res) => {
     }
 });
 
-// Ruta para agregar un producto al carrito
 router.post('/products/:pid/add-to-cart', async (req, res) => {
     try {
         const productId = req.params.pid;
-        const cart = await cartsModel.findOne(); // Obtén el primer carrito disponible, puedes ajustar esta lógica según tus necesidades
+        const cart = await cartsModel.findOne(); 
         if (!cart) {
             return res.status(404).send({ error: "No hay carritos disponibles" });
         }
         cart.products.push(productId);
         await cart.save();
-        res.redirect('/views/products'); // Redirige de vuelta a la página de productos después de agregar el producto al carrito
+        res.redirect('/views/products'); 
     } catch (error) {
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
@@ -52,4 +49,3 @@ router.post('/products/:pid/add-to-cart', async (req, res) => {
 });
 
 export default router;
-
