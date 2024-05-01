@@ -45,8 +45,7 @@
 
 // export default productsController;
 
-
-import productsMongoDAO from '../dataAccess/productsMongoDAO.js';
+import productsRepository from '../repositories/productsRepository.js';
 
 const productsController = {};
 
@@ -54,7 +53,7 @@ productsController.getAllProducts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const { products, totalPages } = await productsMongoDAO.getAllProducts(page, limit);
+        const { products, totalPages } = await productsRepository.getAllProducts(page, limit);
         const prevPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
         res.status(200).send({
@@ -76,7 +75,7 @@ productsController.getAllProducts = async (req, res) => {
 productsController.createProduct = async (req, res) => {
     try {
         const { title, description, code, price, stock, category } = req.body;
-        const product = await productsMongoDAO.createProduct({ title, description, code, price, stock, category });
+        const product = await productsRepository.createProduct({ title, description, code, price, stock, category });
         res.status(201).send({ status: "success", payload: product });
     } catch (error) {
         console.error("No se pudo crear el producto:", error);
@@ -85,3 +84,4 @@ productsController.createProduct = async (req, res) => {
 };
 
 export default productsController;
+

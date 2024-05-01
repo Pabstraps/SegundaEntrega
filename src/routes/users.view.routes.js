@@ -1,4 +1,5 @@
 import { Router } from "express";
+import sessionsController from '../controllers/sessions.controller.js';
 
 const router = Router();
 
@@ -9,6 +10,8 @@ router.get("/login", (req, res) => {
 router.get("/register", (req, res) => {
     res.render('register')
 });
+
+router.post("/register", sessionsController.register, sessionsController.successfulRegister);
 
 router.get("/", (req, res) => {
     res.render('profile', {
