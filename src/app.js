@@ -12,9 +12,13 @@ import sessionsRoutes from './routes/sessions.routes.js';
 import githubloginViewRouter from './routes/github-login.views.routes.js';
 import viewsRoutes from './routes/views.routes.js';
 import initializePassport from '../src/services/config/passport.config.js';
+import productsModel from '../src/models/product.model.js'
+import { fileSystemConfig } from './config/fileSystem.config.js';
+
+
 
 const app = express();
-const MONGO_URL = "mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0'";
+const MONGO_URL = "mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,14 +56,23 @@ app.listen(SERVER_PORT, () => {
     console.log("Servidor escuchando por el puerto: " + SERVER_PORT);
 });
 
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(MONGO_URL);
-        console.log("Conectado con exito a MongoDB usando Moongose.");
-    } catch (error) {
-        console.error("No se pudo conectar a la BD usando Moongose: " + error);
-        process.exit();
-    }
-};
+const DB_TYPE = process.argv[2] || 'MONGO'; // Obtener el tipo de base de datos desde los argumentos de la línea de comandos
 
-connectMongoDB();
+if (DB_TYPE === 'MONGO') {
+    // Configuración para MongoDB
+    
+    const MONGO_URL = "mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0";
+    mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+        .then(() => console.log("Conectado con éxito a MongoDB"))
+        .catch(error => console.error("No se pudo conectar a MongoDB: " + error));
+
+    app.use("/api/products", productsRoutes);
+} else if (DB_TYPE === 'FILESYSTEM') {
+    // Configuración para FileSystem
+    fileSystemConfig(); // Configuración específica para FileSystem
+    
+    app.use("/api/products", productsRoutes);
+} else {
+    console.error("Tipo de base de datos no válido. Use 'MONGO' o 'FILESYSTEM'.");
+    process.exit(1);
+}
