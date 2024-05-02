@@ -80,28 +80,31 @@ const initializePassport = () =>{
 
     passport.use('login', new localStrategy(
         { passReqToCallback: true, usernameField: 'email' },
-        async (req, username,password, done) =>{
+        async (req, email, password, done) => {
             try {
-                const user = await userModel.findOne({email: username})
-                console.log("Usuario encontrado para login");
-                console.log(user);
-
-                if (!user){
-                    console.warn("Credenciales invalidas para el usuario " + username)
-                    return done (null,false)
+                const user = await userModel.findOne({ email });
+                console.log("Usuario encontrado para login:", user);
+    
+                if (!user) {
+                    console.warn("Credenciales inválidas para el usuario:", email);
+                    return done(null, false);
                 }
-
-                if (!isValidPassword(user,password)) {
-                    console.warn("Credenciales invalidas del usuario: " + username)
-                    return done (null,false)
+    
+                if (!isValidPassword(user.password, password)) {
+                    console.warn("Credenciales inválidas del usuario:", email);
+                    return done(null, false);
                 }
-
-                return done (null,user)
+    
+                console.log("Credenciales válidas del usuario:", email);
+                return done(null, user);
             } catch (error) {
-                return done (error)
+                console.error("Error durante el inicio de sesión:", error);
+                return done(error);
             }
         }
-    ))
+    ));
+    
+    
 
 
     passport.serializeUser((user,done) => {

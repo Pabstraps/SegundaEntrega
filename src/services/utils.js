@@ -4,10 +4,15 @@ import bcrypt from 'bcrypt';
 
 //Hasheo de password
 export const createHash = password => bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-export const isValidPassword = (user,password) => {
-    console.log(`datos a validar: user-password ${user.password}, password: ${password}`);
-    return bcrypt.compareSync( password, user.password)
+
+export const isValidPassword = (storedPassword, enteredPassword) => {
+    if (!storedPassword || !enteredPassword) {
+        return false;
+    }
+    console.log(`Datos a validar: storedPassword: ${storedPassword}, enteredPassword: ${enteredPassword}`);
+    return bcrypt.compareSync(enteredPassword, storedPassword);
 };
+
 
 
 const __filename = fileURLToPath(import.meta.url);

@@ -1,40 +1,26 @@
-import userModel from "../../models/user.model.js";
-
-const authMiddleware = {};
-
-authMiddleware.isAdmin = async (req, res, next) => {
-  try {
-    const { userId } = req.user;
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(401).json({ error: "User not found" });
-    }
-    if (user.role !== "admin") {
-      return res.status(403).json({ error: "Unauthorized" });
-    }
-    next();
-  } catch (error) {
-    console.error("Error in isAdmin middleware:", error);
-    res.status(500).json({ error: "Internal server error" });
+export const isAdmin = (req, res, next) => {
+  const user = req.session.user;
+  console.log("User:", user);
+  if (!user || !user.role) {
+    console.log("No hay usuario autenticado o no se ha definido un rol");
+    return res.status(403).json({ error: "Acceso no autorizado" });
   }
+  if (user.role !== 'admin') {
+    console.log("El usuario no tiene rol de administrador");
+    return res.status(403).json({ error: "Acceso no autorizado" });
+  }
+  console.log("Acceso concedido al administrador");
+  next();
 };
 
-authMiddleware.isUser = async (req, res, next) => {
-  try {
-    const { userId } = req.user;
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(401).json({ error: "User not found" });
-    }
-    if (user.role !== "user") {
-      return res.status(403).json({ error: "Unauthorized" });
-    }
-    next();
-  } catch (error) {
-    console.error("Error in isUser middleware:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
 
-export const isAdmin = authMiddleware.isAdmin;
-export const isUser = authMiddleware.isUser;
+
+
+
+export const isUser = (req, res, next) => {
+  const user = req.session.user;
+  if (!user || user.role !== 'user') {
+    return res.status(403).json({ error: "Acceso no autorizado" });
+  }
+  next();
+};

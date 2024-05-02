@@ -1,10 +1,10 @@
-class UserDTO {
-    constructor(user) {
-        this.id = user.id;
-        this.username = user.username;
-        this.email = user.email;
-        this.role = user.role;
-    }
-}
 
-export default UserDTO;
+export const userDTO = (user) => {
+    return {
+      id: user._id,
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      age: user.age,
+    };
+  };
+  

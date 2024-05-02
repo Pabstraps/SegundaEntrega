@@ -44,19 +44,19 @@
 // };
 
 // export default productsController;
-
 import productsRepository from '../repositories/productsRepository.js';
 
 const productsController = {};
+
 
 productsController.getAllProducts = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const { products, totalPages } = await productsRepository.getAllProducts(page, limit);
+        const { payload: products, total_pages: totalPages } = await productsRepository.getAllProducts(page, limit);
         const prevPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
-        res.status(200).send({
+        res.render('viewProducts', {
             status: "success",
             payload: products,
             total_pages: totalPages,
@@ -72,6 +72,37 @@ productsController.getAllProducts = async (req, res) => {
     }
 };
 
+
+productsController.getProductById = async (req, res) => {
+    try {
+        const product = await productsMongoRepository.getProductById(req.params.pid);
+        if (!product) {
+            return res.status(404).send({ error: "Producto no encontrado" });
+        }
+        res.render('productDetails', { product });
+    } catch (error) {
+        console.error("Error al obtener detalles del producto:", error);
+        res.status(500).send({ error: "Error al obtener detalles del producto", message: error });
+    }
+};
+
+productsController.addProductToCart = async (req, res) => {
+    try {
+        const productId = req.params.pid;
+        const cart = await cartsRepository.getCart(); 
+        if (!cart) {
+            return res.status(404).send({ error: "No hay carritos disponibles" });
+        }
+        cart.products.push(productId);
+        await cart.save();
+        res.redirect('/api/products'); 
+    } catch (error) {
+        console.error("Error al agregar producto al carrito:", error);
+        res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
+    }
+};
+
+
 productsController.createProduct = async (req, res) => {
     try {
         const { title, description, code, price, stock, category } = req.body;
@@ -83,5 +114,33 @@ productsController.createProduct = async (req, res) => {
     }
 };
 
-export default productsController;
+productsController.updateProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const { title, description, code, price, stock, category } = req.body;
+        const updatedProduct = await productsRepository.updateProduct(productId, { title, description, code, price, stock, category });
+        if (!updatedProduct) {
+            return res.status(404).send({ error: "Producto no encontrado" });
+        }
+        res.status(200).send({ status: "success", payload: updatedProduct });
+    } catch (error) {
+        console.error("No se pudo actualizar el producto:", error);
+        res.status(500).send({ error: "No se pudo actualizar el producto", message: error });
+    }
+};
 
+productsController.deleteProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        const deletedProduct = await productsRepository.deleteProduct(productId);
+        if (!deletedProduct) {
+            return res.status(404).send({ error: "Producto no encontrado" });
+        }
+        res.status(200).send({ status: "success", message: "Producto eliminado exitosamente" });
+    } catch (error) {
+        console.error("No se pudo eliminar el producto:", error);
+        res.status(500).send({ error: "No se pudo eliminar el producto", message: error });
+    }
+};
+
+export default productsController;

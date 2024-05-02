@@ -1,4 +1,4 @@
-{{#if isValid}}
+{{!-- {{#if isValid}}
 <div>
     {{#each docs}}
     <h1>Bienvenido! {{user.name}} </h1>
@@ -39,6 +39,44 @@
                 Siguiente >> </a>
             {{/if}}
 
+</div>
+{{else}}
+<h1>No hay productos para mostrar</h1>
+{{/if}} --}}
+
+{{#if isValid}}
+<div>
+    {{#each payload}}
+    <h1>Bienvenido! {{../user.name}} </h1>
+
+    <h2>Lista de productos:</h2>
+
+    <div>
+        <h3>Titulo: {{this.title}}</h3>
+        <p>Descipcion: {{this.description}}</p>
+        <p>Categoria: {{this.category}}</p>
+        <p>SKU: {{this.code}}</p>
+        <p>Precio: {{this.price}}</p>
+        <p>Disponibles: {{this.stock}}</p>
+        <form action="/api/products/{{this._id}}/add-to-cart" method="POST">
+            <button type="submit">Agregar al carrito</button>
+        </form>
+    </div>
+    <br />
+    {{/each}}
+</div>
+<br />
+
+<div>
+    {{#if has_prev_page}}
+        <a href="{{prev_page}}"><< Anterior</a>
+    {{/if}}
+
+    &nbsp;{{current_page}}&nbsp;
+
+    {{#if has_next_page}}
+        <a href="{{next_page}}">Siguiente >></a>
+    {{/if}}
 </div>
 {{else}}
 <h1>No hay productos para mostrar</h1>
