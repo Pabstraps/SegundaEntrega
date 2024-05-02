@@ -51,31 +51,33 @@ const productsController = {};
 
 productsController.getAllProducts = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const { payload: products, total_pages: totalPages } = await productsRepository.getAllProducts(page, limit);
+        let page = parseInt(req.query.page);
+        if (!page) page = 1;
+        const limit = 4; // Limit de productos por página
+        const { products, totalPages } = await productsRepository.getAllProducts(page, limit);
         const prevPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
-        res.render('viewProducts', {
+        const result = {
             status: "success",
-            payload: products,
+            products: products,
             total_pages: totalPages,
             current_page: page,
             prev_page: prevPage,
             next_page: nextPage,
             has_prev_page: prevPage !== null,
             has_next_page: nextPage !== null
-        });
+        };
+        res.render('viewProducts', result);
     } catch (error) {
-        console.error("No se pudo obtener productos:", error);
-        res.status(500).send({ error: "No se pudo obtener productos", message: error });
+        console.error("Error al obtener productos para la vista:", error);
+        res.status(500).send({ error: "Error al obtener productos para la vista", message: error });
     }
 };
 
 
 productsController.getProductById = async (req, res) => {
     try {
-        const product = await productsMongoRepository.getProductById(req.params.pid);
+        const product = await productsRepository.getProductById(req.params.pid);
         if (!product) {
             return res.status(404).send({ error: "Producto no encontrado" });
         }
@@ -86,16 +88,16 @@ productsController.getProductById = async (req, res) => {
     }
 };
 
-productsController.addProductToCart = async (req, res) => {
+productsController.addToCart = async (req, res) => {
     try {
         const productId = req.params.pid;
-        const cart = await cartsRepository.getCart(); 
+        const cart = await cartsModel.findOne(); 
         if (!cart) {
             return res.status(404).send({ error: "No hay carritos disponibles" });
         }
         cart.products.push(productId);
         await cart.save();
-        res.redirect('/api/products'); 
+        res.redirect('/views/products'); 
     } catch (error) {
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
