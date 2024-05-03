@@ -44,35 +44,39 @@
 // };
 
 // export default productsController;
+
 import productsRepository from '../repositories/productsRepository.js';
+import cartsModel from '../models/cart.model.js';
+import productsModel from '../models/product.model.js'
 
 const productsController = {};
 
 
+
 productsController.getAllProducts = async (req, res) => {
     try {
-        let page = parseInt(req.query.page);
-        if (!page) page = 1;
-        const limit = 4; // Limit de productos por página
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         const { products, totalPages } = await productsRepository.getAllProducts(page, limit);
         const prevPage = page > 1 ? page - 1 : null;
         const nextPage = page < totalPages ? page + 1 : null;
-        const result = {
+        res.render('products', {
             status: "success",
-            products: products,
+            products: products.map(product => product.toObject()), // Mapeamos los productos a objetos simples
             total_pages: totalPages,
             current_page: page,
             prev_page: prevPage,
             next_page: nextPage,
             has_prev_page: prevPage !== null,
             has_next_page: nextPage !== null
-        };
-        res.render('viewProducts', result);
+        });
     } catch (error) {
-        console.error("Error al obtener productos para la vista:", error);
-        res.status(500).send({ error: "Error al obtener productos para la vista", message: error });
+        console.error("No se pudo obtener productos:", error);
+        res.status(500).send({ error: "No se pudo obtener productos", message: error });
     }
 };
+
+
 
 
 productsController.getProductById = async (req, res) => {
@@ -91,11 +95,17 @@ productsController.getProductById = async (req, res) => {
 productsController.addToCart = async (req, res) => {
     try {
         const productId = req.params.pid;
-        const cart = await cartsModel.findOne(); 
-        if (!cart) {
-            return res.status(404).send({ error: "No hay carritos disponibles" });
+        const product = await productsModel.findById(productId);
+        if (!product) {
+            return res.status(404).send({ error: "Producto no encontrado" });
         }
-        cart.products.push(productId);
+        
+        let cart = await cartsModel.findOne();
+        if (!cart) {
+            cart = new cartsModel();
+        }
+        
+        cart.products.push(product);
         await cart.save();
         res.redirect('/views/products'); 
     } catch (error) {

@@ -17,6 +17,9 @@ import { fileSystemConfig } from './config/fileSystem.config.js';
 
 
 
+
+
+
 const app = express();
 const MONGO_URL = "mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0";
 

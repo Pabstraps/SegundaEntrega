@@ -1,5 +1,8 @@
 import cartsModel  from '../models/cart.model.js';
 
+import ticketsController from '../controllers/tickets.controller.js';
+
+
 const cartsController = {};
 
 cartsController.getAllCarts = async (req, res) => {
@@ -11,6 +14,19 @@ cartsController.getAllCarts = async (req, res) => {
         res.status(500).send({ error: "No se pudo cargar el carrito", message: error });
     }
 };
+
+cartsController.purchaseCart = async (req, res) => {
+    try {
+      const { cid } = req.params;
+      const purchaserEmail = req.user.email;
+  
+      const ticket = await ticketsController.purchaseCart(cid, purchaserEmail);
+      res.status(200).json({ status: 'success', ticket });
+    } catch (error) {
+      console.error('Error al procesar la compra:', error);
+      res.status(500).json({ status: 'error', message: 'Error al procesar la compra' });
+    }
+  };
 
 cartsController.createCart = async (req, res) => {
     try {
@@ -25,23 +41,23 @@ cartsController.createCart = async (req, res) => {
 
 cartsController.addToCart = async (req, res) => {
     try {
-        const { cid } = req.params;
-        const { productId } = req.body;
-
-        let cart = await cartsModel.findById(cid);
+        const productId = req.params.pid;
+        let cart = req.session.cart;
         if (!cart) {
-            return res.status(404).send({ error: "Carrito no encontrado" });
+            cart = await cartsModel.create({});
+            req.session.cart = cart;
         }
-
-        cart.products.push({ productId });
+        cart.products.push(productId);
         await cart.save();
-        
-        res.status(200).send({ status: "success", message: "Producto agregado al carrito" });
+        res.redirect('/api/products');
     } catch (error) {
-        console.error("Error al agregar producto al carrito: " + error);
+        console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
     }
 };
+
+
+
 
 cartsController.getCartWithProducts = async (req, res) => {
     try {

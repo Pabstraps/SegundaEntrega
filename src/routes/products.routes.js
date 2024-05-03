@@ -2,6 +2,8 @@ import { Router } from 'express';
 import productsMongoController from '../controllers/products.controller.js';
 import productsFileSystemController from '../controllers/productsFileSystem.controller.js';
 import { isAdmin, isUser } from '../services/middlewares/auth.middleware.js';
+import productsController from '../controllers/products.controller.js';
+
 
 const router = Router();
 
@@ -10,6 +12,8 @@ router.get('/', isUser, productsMongoController.getAllProducts);
 router.post('/', isAdmin, productsMongoController.createProduct);
 router.put('/:id', isAdmin, productsMongoController.updateProduct);
 router.delete('/:id', isAdmin, productsMongoController.deleteProduct);
+router.post('/:pid/add-to-cart', productsController.addToCart);
+
 
 // Rutas para FileSystem
 router.get('/fs', isUser, productsFileSystemController.getAllProducts);
