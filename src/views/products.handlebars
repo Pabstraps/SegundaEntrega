@@ -71,7 +71,11 @@
     </div>
     <br />
     {{/each}}
+
+    
 </div>
+
+
 <br />
 
 <div>
@@ -90,27 +94,12 @@
                 Siguiente >> </a>
             {{/if}}
 
+
 </div>
+
+    <br>
+    <a href="/api/products/cart">Ver carrito</a> <!-- Este es el nuevo botón -->
+
 {{else}}
 <h1>No hay productos para mostrar</h1>
-{{/if}}
-
-
-{{#if cart}}
-<div>
-    <h2>Productos en el carrito:</h2>
-    {{#each cart.products}}
-    <div>
-        <h3>Titulo: {{this.product.title}}</h3>
-        <p>Precio: {{this.product.price}}</p>
-        <p>Cantidad: {{this.quantity}}</p>
-    </div>
-    <br />
-    {{/each}}
-    <form action="/api/carts/{{cart._id}}/purchase" method="POST">
-        <button type="submit">Finalizar Compra</button>
-    </form>
-</div>
-{{else}}
-<h1>No hay productos en el carrito</h1>
 {{/if}}

@@ -76,24 +76,6 @@ productsController.getAllProducts = async (req, res) => {
     }
 };
 
-productsController.getProducts = async (req, res) => {
-    try {
-      const products = await productsModel.find();
-      let cart = await cartsModel.findOne();
-      if (!cart) {
-        // Si no hay un carrito, creamos uno
-        cart = new Cart({ title: "Carrito", description: "Carrito de compras", products: [] });
-        await cart.save();
-      }
-      console.log('Carrito:', cart); // Verifiquemos si el carrito se está creando correctamente
-      res.render('products', { products, cart, user: req.user });
-    } catch (error) {
-      console.error('Error al obtener los productos:', error);
-      res.status(500).json({ error: 'Error al obtener los productos', message: error.message });
-    }
-  };
-
-
 
 productsController.getProductById = async (req, res) => {
     try {
@@ -129,6 +111,20 @@ productsController.addToCart = async (req, res) => {
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
     }
 };
+
+productsController.getCart = async (req, res) => {
+    try {
+        const cart = await cartsModel.findOne().populate('products');
+        if (!cart) {
+            return res.render('cart', { cart: { products: [] } });
+        }
+        res.render('cart', { cart });
+    } catch (error) {
+        console.error("Error al obtener el carrito:", error);
+        res.status(500).send({ error: "Error al obtener el carrito", message: error });
+    }
+};
+
 
 
 

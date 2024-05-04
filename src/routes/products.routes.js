@@ -14,6 +14,8 @@ router.put('/:id', isAdmin, productsMongoController.updateProduct);
 router.delete('/:id', isAdmin, productsMongoController.deleteProduct);
 router.post('/:pid/add-to-cart', productsController.addToCart);
 
+router.get('/cart', productsController.getCart); 
+
 
 
 // Rutas para FileSystem
