@@ -1,8 +1,8 @@
 <div>
-    {{#if products.length}}
+    {{#if cart.products.length}}
         <div>
             <h1>Productos en el carrito:</h1>
-            {{#each products}}
+            {{#each cart.products}}
                 <div>
                     <h3>Titulo: {{this.title}}</h3>
                     <p>Descipcion: {{this.description}}</p>
@@ -14,7 +14,7 @@
                 </div>
             {{/each}}
             <br>
-            <a href="/api/products/cart/purchase">Finalizar compra</a>
+            <a href="/api/carts/{{cart._id}}/purchase">Finalizar compra</a>
         </div>
     {{else}}
         <h1>No hay productos en el carrito</h1>

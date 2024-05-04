@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import cartsController from '../controllers/carts.controller.js';
+import { isUser } from '../services/middlewares/auth.middleware.js';
 
 
 const router = Router();
 
 router.get('/', cartsController.getAllCarts);
 router.post('/', cartsController.createCart);
-router.post('/:cid/purchase', cartsController.purchase);
+router.post('/:cid/purchase', isUser, cartsController.purchaseCart);
 router.post('/:cid/products', cartsController.addToCart);
 router.get('/:cid', cartsController.getCartWithProducts);
 router.put('/:id', cartsController.updateCart);

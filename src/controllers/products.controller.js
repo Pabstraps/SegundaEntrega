@@ -115,15 +115,26 @@ productsController.addToCart = async (req, res) => {
 productsController.getCart = async (req, res) => {
     try {
         const cart = await cartsModel.findOne().populate('products');
-        if (!cart || cart.products.length === 0) {
-            return res.render('cart', { products: [] }); // Pasar un array vacío si no hay carrito o no hay productos en el carrito
+        if (!cart) {
+            return res.render('cart', { products: [] });
         }
-        res.render('cart', { products: cart.products }); // Pasar los productos encontrados en el carrito
+        const cartData = {
+            products: cart.products.map(product => ({
+                title: product.title,
+                description: product.description,
+                category: product.category,
+                code: product.code,
+                price: product.price,
+                stock: product.stock
+            }))
+        };
+        res.render('cart', cartData);
     } catch (error) {
         console.error("Error al obtener el carrito:", error);
         res.status(500).send({ error: "Error al obtener el carrito", message: error });
     }
 };
+
 
 
 

@@ -1,6 +1,7 @@
 import cartsModel  from '../models/cart.model.js';
 import Ticket from '../models/ticket.model.js';
 import Cart from '../models/cart.model.js';
+import Product from '../models/product.model.js'
 
 const cartsController = {};
 
@@ -14,55 +15,65 @@ cartsController.getAllCarts = async (req, res) => {
     }
 };
 
-cartsController.purchase = async (req, res) => {
+cartsController.purchaseCart = async (req, res) => {
     try {
-      const cartId = req.params.cid;
-      const cart = await Cart.findById(cartId).populate('products.product');
-      if (!cart) {
-        return res.status(404).json({ error: 'Carrito no encontrado' });
-      }
-  
-      // Verificar stock y calcular monto total
-      let totalAmount = 0;
-      const productsToUpdate = [];
-  
-      for (const item of cart.products) {
-        if (item.quantity > item.product.stock) {
-          return res.status(400).json({ error: 'No hay suficiente stock para completar la compra' });
+        const cartId = req.params.cid;
+        const cart = await cartsModel.findById(cartId).populate('products.product');
+        
+        if (!cart) {
+            return res.status(404).json({ error: 'Carrito no encontrado' });
         }
-        totalAmount += item.quantity * item.product.price;
-        productsToUpdate.push({
-          productId: item.product._id,
-          quantity: item.quantity,
+
+        let totalAmount = 0;
+        const productsToUpdate = [];
+        const notPurchasedProducts = [];
+
+        for (const item of cart.products) {
+            const product = await Product.findById(item.product._id);
+            
+            if (!product || product.stock < item.quantity) {
+                notPurchasedProducts.push(item.product._id);
+            } else {
+                totalAmount += product.price * item.quantity;
+                productsToUpdate.push({
+                    productId: item.product._id,
+                    quantity: item.quantity,
+                });
+            }
+        }
+
+        for (const product of productsToUpdate) {
+            await Product.findByIdAndUpdate(product.productId, { $inc: { stock: -product.quantity } });
+        }
+
+        const ticket = new Ticket({
+            code: generateUniqueCode(),
+            purchase_datetime: new Date(),
+            amount: totalAmount,
+            purchaser: req.user.email,
         });
-      }
-  
-      // Actualizar stock de productos
-      for (const product of productsToUpdate) {
-        await Cart.updateOne(
-          { _id: cartId, 'products.product': product.productId },
-          { $inc: { 'products.$.product.stock': -product.quantity } }
-        );
-      }
-  
-      // Crear el ticket
-      const ticket = new Ticket({
-        code: Math.random().toString(36).substring(7).toUpperCase(),
-        amount: totalAmount,
-        purchaser: req.user.email,
-      });
-  
-      await ticket.save();
-  
-      // Eliminar el carrito
-      await Cart.findByIdAndDelete(cartId);
-  
-      res.json({ message: 'Compra realizada con éxito', ticket });
+
+        await ticket.save();
+
+        if (notPurchasedProducts.length > 0) {
+            cart.products = cart.products.filter(item => !notPurchasedProducts.includes(item.product._id));
+            await cart.save();
+        } else {
+            await cartsModel.findByIdAndDelete(cartId);
+        }
+
+        res.status(200).json({
+            message: 'Compra realizada con éxito',
+            ticketId: ticket._id,
+            notPurchasedProducts: notPurchasedProducts,
+        });
     } catch (error) {
-      console.error('Error al realizar la compra:', error);
-      res.status(500).json({ error: 'Error al realizar la compra', message: error.message });
+        console.error('Error al realizar la compra:', error);
+        res.status(500).json({ error: 'Error al realizar la compra', message: error.message });
     }
-  };
+};
+
+
 
 cartsController.createCart = async (req, res) => {
     try {
@@ -204,5 +215,15 @@ cartsController.deleteAllProductsFromCart = async (req, res) => {
         res.status(500).send({ error: "Error al eliminar todos los productos del carrito", message: error });
     }
 };
+
+// Función para generar un código único para el ticket
+function generateUniqueCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+        code += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return code;
+}
 
 export default cartsController;
