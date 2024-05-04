@@ -1,7 +1,6 @@
 import cartsModel  from '../models/cart.model.js';
-
-import ticketsController from '../controllers/tickets.controller.js';
-
+import Ticket from '../models/ticket.model.js';
+import Cart from '../models/cart.model.js';
 
 const cartsController = {};
 
@@ -15,16 +14,53 @@ cartsController.getAllCarts = async (req, res) => {
     }
 };
 
-cartsController.purchaseCart = async (req, res) => {
+cartsController.purchase = async (req, res) => {
     try {
-      const { cid } = req.params;
-      const purchaserEmail = req.user.email;
+      const cartId = req.params.cid;
+      const cart = await Cart.findById(cartId).populate('products.product');
+      if (!cart) {
+        return res.status(404).json({ error: 'Carrito no encontrado' });
+      }
   
-      const ticket = await ticketsController.purchaseCart(cid, purchaserEmail);
-      res.status(200).json({ status: 'success', ticket });
+      // Verificar stock y calcular monto total
+      let totalAmount = 0;
+      const productsToUpdate = [];
+  
+      for (const item of cart.products) {
+        if (item.quantity > item.product.stock) {
+          return res.status(400).json({ error: 'No hay suficiente stock para completar la compra' });
+        }
+        totalAmount += item.quantity * item.product.price;
+        productsToUpdate.push({
+          productId: item.product._id,
+          quantity: item.quantity,
+        });
+      }
+  
+      // Actualizar stock de productos
+      for (const product of productsToUpdate) {
+        await Cart.updateOne(
+          { _id: cartId, 'products.product': product.productId },
+          { $inc: { 'products.$.product.stock': -product.quantity } }
+        );
+      }
+  
+      // Crear el ticket
+      const ticket = new Ticket({
+        code: Math.random().toString(36).substring(7).toUpperCase(),
+        amount: totalAmount,
+        purchaser: req.user.email,
+      });
+  
+      await ticket.save();
+  
+      // Eliminar el carrito
+      await Cart.findByIdAndDelete(cartId);
+  
+      res.json({ message: 'Compra realizada con éxito', ticket });
     } catch (error) {
-      console.error('Error al procesar la compra:', error);
-      res.status(500).json({ status: 'error', message: 'Error al procesar la compra' });
+      console.error('Error al realizar la compra:', error);
+      res.status(500).json({ error: 'Error al realizar la compra', message: error.message });
     }
   };
 
@@ -42,19 +78,19 @@ cartsController.createCart = async (req, res) => {
 cartsController.addToCart = async (req, res) => {
     try {
         const productId = req.params.pid;
-        let cart = req.session.cart;
+        let cart = await cartsModel.findOne();
         if (!cart) {
-            cart = await cartsModel.create({});
-            req.session.cart = cart;
+            cart = new cartsModel({ title: 'Cart' });
         }
         cart.products.push(productId);
         await cart.save();
-        res.redirect('/api/products');
+        res.redirect('/views/cart');
     } catch (error) {
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
     }
 };
+
 
 
 

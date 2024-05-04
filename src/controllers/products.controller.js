@@ -76,6 +76,22 @@ productsController.getAllProducts = async (req, res) => {
     }
 };
 
+productsController.getProducts = async (req, res) => {
+    try {
+      const products = await productsModel.find();
+      let cart = await cartsModel.findOne();
+      if (!cart) {
+        // Si no hay un carrito, creamos uno
+        cart = new Cart({ title: "Carrito", description: "Carrito de compras", products: [] });
+        await cart.save();
+      }
+      console.log('Carrito:', cart); // Verifiquemos si el carrito se está creando correctamente
+      res.render('products', { products, cart, user: req.user });
+    } catch (error) {
+      console.error('Error al obtener los productos:', error);
+      res.status(500).json({ error: 'Error al obtener los productos', message: error.message });
+    }
+  };
 
 
 
@@ -94,25 +110,26 @@ productsController.getProductById = async (req, res) => {
 
 productsController.addToCart = async (req, res) => {
     try {
-        const productId = req.params.pid;
-        const product = await productsModel.findById(productId);
-        if (!product) {
-            return res.status(404).send({ error: "Producto no encontrado" });
-        }
-        
+        const { title, description, category, code, price, stock } = req.body;
+
+        // Reemplazar las comas en el precio y convertirlo a un número
+        const parsedPrice = parseFloat(price.replace(',', ''));
+
         let cart = await cartsModel.findOne();
         if (!cart) {
-            cart = new cartsModel();
+            cart = new cartsModel({ title: 'Cart' });
         }
-        
+
+        const product = { title, description, category, code, price: parsedPrice, stock };
         cart.products.push(product);
         await cart.save();
-        res.redirect('/views/products'); 
+        res.redirect('/api/products'); 
     } catch (error) {
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
     }
 };
+
 
 
 productsController.createProduct = async (req, res) => {

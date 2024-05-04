@@ -1,4 +1,4 @@
-{{#if products.length}}
+{{!-- {{#if products.length}}
 <div>
     {{#each products}}
     <h1>Bienvenido! {{../user.name}} </h1>
@@ -41,4 +41,76 @@
 </div>
 {{else}}
 <h1>No hay productos para mostrar</h1>
+{{/if}} --}}
+
+{{#if products.length}}
+<div>
+    {{#each products}}
+    <h1>Bienvenido! {{user.name}} </h1>
+
+    <h2>Lista de productos:</h2>
+
+    <div>
+        <h3>Titulo: {{this.title}}</h3>
+        <p>Descipcion: {{this.description}}</p>
+        <p>Categoria: {{this.category}}</p>
+        <p>SKU: {{this.code}}</p>
+        <p>Precio: {{this.price}}</p>
+        <p>Disponibles: {{this.stock}}</p>
+  <form action="/api/products/{{this._id}}/add-to-cart" method="POST">
+      <input type="hidden" name="title" value="{{this.title}}">
+      <input type="hidden" name="description" value="{{this.description}}">
+      <input type="hidden" name="category" value="{{this.category}}">
+      <input type="hidden" name="code" value="{{this.code}}">
+      <input type="hidden" name="price" value="{{this.price}}">
+      <input type="hidden" name="stock" value="{{this.stock}}">
+      <input type="number" name="quantity" value="1" min="1">
+      <button type="submit">Agregar al carrito</button>
+    </form>
+
+    </div>
+    <br />
+    {{/each}}
+</div>
+<br />
+
+<div>
+    {{#if hasPrevPage}}
+    <a href={{this.prevLink}}>
+        << Anterior </a>
+            {{/if}}
+
+            {{!-- numero de pagina --}}
+            &nbsp;
+            {{this.page}}
+            &nbsp;
+
+            {{#if hasNextPage}}
+            <a href={{this.nextLink}}>
+                Siguiente >> </a>
+            {{/if}}
+
+</div>
+{{else}}
+<h1>No hay productos para mostrar</h1>
+{{/if}}
+
+
+{{#if cart}}
+<div>
+    <h2>Productos en el carrito:</h2>
+    {{#each cart.products}}
+    <div>
+        <h3>Titulo: {{this.product.title}}</h3>
+        <p>Precio: {{this.product.price}}</p>
+        <p>Cantidad: {{this.quantity}}</p>
+    </div>
+    <br />
+    {{/each}}
+    <form action="/api/carts/{{cart._id}}/purchase" method="POST">
+        <button type="submit">Finalizar Compra</button>
+    </form>
+</div>
+{{else}}
+<h1>No hay productos en el carrito</h1>
 {{/if}}
