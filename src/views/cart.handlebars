@@ -1,23 +1,22 @@
 <div>
-    {{#if cart.products.length}}
-    <div>
-        <h1>Productos en el carrito:</h1>
-
-        {{#each cart.products}}
+    {{#if products.length}}
         <div>
-            <h3>Titulo: {{this.title}}</h3>
-            <p>Descipcion: {{this.description}}</p>
-            <p>Categoria: {{this.category}}</p>
-            <p>SKU: {{this.code}}</p>
-            <p>Precio: {{this.price}}</p>
-            <p>Disponibles: {{this.stock}}</p>
+            <h1>Productos en el carrito:</h1>
+            {{#each products}}
+                <div>
+                    <h3>Titulo: {{this.title}}</h3>
+                    <p>Descipcion: {{this.description}}</p>
+                    <p>Categoria: {{this.category}}</p>
+                    <p>SKU: {{this.code}}</p>
+                    <p>Precio: {{this.price}}</p>
+                    <p>Disponibles: {{this.stock}}</p>
+                    <br>
+                </div>
+            {{/each}}
             <br>
+            <a href="/api/products/cart/purchase">Finalizar compra</a>
         </div>
-        {{/each}}
-    </div>
-    <br>
-    <a href="/api/cart/purchase">Finalizar compra</a>
     {{else}}
-    <h1>No hay productos en el carrito</h1>
+        <h1>No hay productos en el carrito</h1>
     {{/if}}
 </div>
