@@ -1,6 +1,5 @@
 import cartsModel  from '../models/cart.model.js';
 import Ticket from '../models/ticket.model.js';
-import Cart from '../models/cart.model.js';
 import Product from '../models/product.model.js'
 
 const cartsController = {};
@@ -113,12 +112,13 @@ cartsController.getCartWithProducts = async (req, res) => {
         if (!cart) {
             return res.status(404).send({ error: "Carrito no encontrado" });
         }
-        res.send({ result: "success", payload: cart });
+        res.render('cart', { cart }); // Asegúrate de pasar correctamente el cart
     } catch (error) {
         console.error("Error al obtener el carrito con los productos completos: " + error);
         res.status(500).send({ error: "Error al obtener el carrito con los productos completos", message: error });
     }
 };
+
 
 cartsController.updateCart = async (req, res) => {
     try {
