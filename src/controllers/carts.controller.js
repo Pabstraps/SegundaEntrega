@@ -14,11 +14,11 @@ cartsController.getAllCarts = async (req, res) => {
     }
 };
 
-cartsController.purchaseCart = async (req, res) => {
+cartsController.purchase = async (req, res) => {
     try {
         const cartId = req.params.cid;
         const cart = await cartsModel.findById(cartId).populate('products.product');
-        
+        console.log(cartId)
         if (!cart) {
             return res.status(404).json({ error: 'Carrito no encontrado' });
         }
@@ -108,16 +108,20 @@ cartsController.addToCart = async (req, res) => {
 cartsController.getCartWithProducts = async (req, res) => {
     try {
         const { cid } = req.params;
-        const cart = await cartsModel.findById(cid).populate('products');
+        const cart = await cartsModel.findById(cid).populate('products.product');
         if (!cart) {
             return res.status(404).send({ error: "Carrito no encontrado" });
         }
-        res.render('cart', { cart }); // Asegúrate de pasar correctamente el cart
+        res.render('cart', { cart }); // Cambiado de res.send a res.render
     } catch (error) {
         console.error("Error al obtener el carrito con los productos completos: " + error);
         res.status(500).send({ error: "Error al obtener el carrito con los productos completos", message: error });
     }
 };
+
+
+
+
 
 
 cartsController.updateCart = async (req, res) => {
