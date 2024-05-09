@@ -11,6 +11,7 @@ import usersViewRoutes from './routes/users.view.routes.js';
 import sessionsRoutes from './routes/sessions.routes.js';
 import githubloginViewRouter from './routes/github-login.views.routes.js';
 import viewsRoutes from './routes/views.routes.js';
+import mockingProducts from './routes/products.mocking.routes.js'
 import initializePassport from '../src/services/config/passport.config.js';
 import productsModel from '../src/models/product.model.js'
 import { fileSystemConfig } from './config/fileSystem.config.js';
@@ -49,6 +50,7 @@ app.use("/api/cart", cartsRoutes);
 app.use("/users", usersViewRoutes);
 app.use("/api/sessions", sessionsRoutes);
 app.use("/github", githubloginViewRouter);
+app.use("/",mockingProducts)
 
 initializePassport();
 app.use(passport.initialize());

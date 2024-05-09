@@ -18,6 +18,8 @@ router.get('/cart', productsController.getCart);
 
 
 
+
+
 // Rutas para FileSystem
 router.get('/fs', isUser, productsFileSystemController.getAllProducts);
 router.post('/fs', isAdmin, productsFileSystemController.createProduct);

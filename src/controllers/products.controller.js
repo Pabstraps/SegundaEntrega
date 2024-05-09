@@ -148,6 +148,18 @@ productsController.getCart = async (req, res) => {
 productsController.createProduct = async (req, res) => {
     try {
         const { title, description, code, price, stock, category } = req.body;
+
+
+        if (!title || !price || !description || !code || !stock || !category) {
+            // Create Custom Error
+            CustomError.createError({
+                name: "User Creation Error",
+                cause: generateProductErrorInfoESP (),
+                message: "Error tratando de crear el producto.",
+                code: EErrors.INVALID_TYPES_ERROR
+            })
+        }
+
         const product = await productsRepository.createProduct({ title, description, code, price, stock, category });
         res.status(201).send({ status: "success", payload: product });
     } catch (error) {
