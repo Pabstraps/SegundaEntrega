@@ -17,7 +17,7 @@ import productsModel from '../src/models/product.model.js'
 import { fileSystemConfig } from './config/fileSystem.config.js';
 
 
-
+import { addLogger } from './config/loggerCustom.js';
 
 
 
@@ -32,6 +32,8 @@ app.set('views', path.join(path.resolve(), 'src', 'views'));
 app.set('view engine', 'handlebars');
 app.use(express.static(path.join(path.resolve(), 'src', 'public')));
 
+
+app.use(addLogger);
 
 app.use(session({
     store: mongoStore.create({
@@ -51,6 +53,11 @@ app.use("/users", usersViewRoutes);
 app.use("/api/sessions", sessionsRoutes);
 app.use("/github", githubloginViewRouter);
 app.use("/",mockingProducts)
+
+app.get("/loggerTest", (req, res) => {
+    req.logger.warning("Prueba de log level warning --> en Endpoint"); // **CUSTOM
+    res.send("Prueba de logger!");
+});
 
 initializePassport();
 app.use(passport.initialize());
