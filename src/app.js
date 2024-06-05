@@ -15,14 +15,31 @@ import mockingProducts from './routes/products.mocking.routes.js'
 import initializePassport from '../src/services/config/passport.config.js';
 import productsModel from '../src/models/product.model.js'
 import { fileSystemConfig } from './config/fileSystem.config.js';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUIExpress from 'swagger-ui-express'
 
 
 import { addLogger } from './config/loggerCustom.js';
 
 
-
 const app = express();
 const MONGO_URL = "mongodb+srv://pablozg24:Admin@cluster0.7revplc.mongodb.net/Ecommerce?retryWrites=true&w=majority&appName=Cluster0";
+
+const swaggerOptions ={
+    definition: {
+        openapi:"3.0.1",
+        info:{
+            title: "Proyecto final Backend",
+            description: "Documentacion para uso de swagger"
+        }
+    },
+    apis:['./src/docs/**/*.yaml']
+}
+
+const specs = swaggerJSDoc(swaggerOptions)
+app.use('/apidocs', swaggerUIExpress.serve, swaggerUIExpress.setup(specs))
+
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -63,7 +80,7 @@ initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
-const SERVER_PORT = 8080;
+const SERVER_PORT = process.env.PORT || 8080;
 app.listen(SERVER_PORT, () => {
     console.log("Servidor escuchando por el puerto: " + SERVER_PORT);
 });

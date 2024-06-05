@@ -8,7 +8,7 @@ import productsController from '../controllers/products.controller.js';
 const router = Router();
 
 // Rutas para MongoDB
-router.get('/', isUser, productsMongoController.getAllProducts);
+router.get('/', productsMongoController.getAllProducts);
 router.post('/', isAdmin, productsMongoController.createProduct);
 router.put('/:id', isAdmin, productsMongoController.updateProduct);
 router.delete('/:id', isAdmin, productsMongoController.deleteProduct);

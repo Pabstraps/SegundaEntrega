@@ -1,0 +1,55 @@
+paths:
+  /views/products/:
+    get:
+      summary: Obtiene todos los productos disponibles.
+      tags: 
+        - Productos
+      responses:
+        "200":
+          description: La operacion fue exitosa.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#components/schemas/product'
+        "400":
+          description: Se envia un dato no esperado
+        "500":
+          description: Error inresperado
+
+components:
+  schemas:
+    product:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          description: Id autogenerado por MongoDB.
+        title:
+          type: String
+          description: titulo del producto
+        description:
+          type: String
+          description: descripcion detallada del producto.
+        code:
+          type: String
+          description: UPC o SKU del producto.
+        price:
+          type: String
+          description: Precio de venta.
+        stock:
+          type: String
+          description: Cantidades disponibles en inventario.
+        category:
+          type: String
+          description: Categoria del producto
+      example:
+        _id: ObjectId(6631592d0ea4e097e5067279)
+        title: Control Xbox serie X
+        description: Marca Microsoft, Carbon black
+        code: 889842716894
+        price: 1,300
+        stock: 10
+        category: accesories
+                 

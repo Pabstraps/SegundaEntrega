@@ -6,18 +6,13 @@ const router = Router();
 
 router.get('/products/', async (req, res) => {
     try {
-        let page = parseInt(req.query.page);
-        if (!page) page = 1;
-        let result = await productsModel.paginate({}, { page, limit: 4, lean: true });
-        result.prevLink = result.hasPrevPage ? `http://localhost:8080/views/products?page=${result.prevPage}` : '';
-        result.nextLink = result.hasNextPage ? `http://localhost:8080/views/products?page=${result.nextPage}` : '';
-        result.isValid = !(page < 1 || page > result.totalPages);
-        res.render('viewProducts', result);
+        let products = await productsModel.find();
+        res.send({ result: "success", payload: products })
     } catch (error) {
-        console.error("Error al obtener productos para la vista:", error);
-        res.status(500).send({ error: "Error al obtener productos para la vista", message: error });
+        console.error("No se pudo obtener los productos: " + error);
+        res.status(500).send({ error: "No se pudo obtener los productos con moongose", message: error });
     }
-});
+})
 
 router.get('/products/:pid', async (req, res) => {
     try {
