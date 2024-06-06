@@ -15,9 +15,12 @@ import mockingProducts from './routes/products.mocking.routes.js'
 import initializePassport from '../src/services/config/passport.config.js';
 import productsModel from '../src/models/product.model.js'
 import { fileSystemConfig } from './config/fileSystem.config.js';
+import emailRouter from './routes/email.routes.js';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUIExpress from 'swagger-ui-express'
 
+
+import config from './config/config.js'
 
 import { addLogger } from './config/loggerCustom.js';
 
@@ -70,6 +73,7 @@ app.use("/users", usersViewRoutes);
 app.use("/api/sessions", sessionsRoutes);
 app.use("/github", githubloginViewRouter);
 app.use("/",mockingProducts)
+app.use("/api/email", emailRouter);
 
 app.get("/loggerTest", (req, res) => {
     req.logger.warning("Prueba de log level warning --> en Endpoint"); // **CUSTOM
@@ -84,6 +88,7 @@ const SERVER_PORT = process.env.PORT || 8080;
 app.listen(SERVER_PORT, () => {
     console.log("Servidor escuchando por el puerto: " + SERVER_PORT);
 });
+
 
 const DB_TYPE = process.argv[2] || 'MONGO'; // Obtener el tipo de base de datos desde los argumentos de la línea de comandos
 
@@ -105,3 +110,4 @@ if (DB_TYPE === 'MONGO') {
     console.error("Tipo de base de datos no válido. Use 'MONGO' o 'FILESYSTEM'.");
     process.exit(1);
 }
+
