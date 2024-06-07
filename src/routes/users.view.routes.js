@@ -1,5 +1,6 @@
 import { Router } from "express";
 import sessionsController from '../controllers/sessions.controller.js';
+import { requestPasswordReset } from "../controllers/sessions.controller.js";
 
 const router = Router();
 
@@ -18,6 +19,8 @@ router.get("/", (req, res) => {
         user: req.session.user
     })
 });
+
+router.post('/request-password-reset', requestPasswordReset);
 
 router.get("/logout", (req, res) => {
     req.session.destroy(error => {

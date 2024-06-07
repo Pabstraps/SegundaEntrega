@@ -47,3 +47,26 @@ export const sendEmail = (req,res) => {
         res.status(500).send({ error: error, message: "No se pudo enviar el email desde:" + config.gmailAppPassword})
     }
 }
+
+export const sendPasswordResetEmail = (user, token) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: config.gmailAccount,
+            pass: config.gmailAppPassword,
+        },
+    });
+
+    const resetUrl = `http://localhost:8080/api/email/reset-password?token=${token}`;
+
+    const mailOptions = {
+        from: config.gmailAccount,
+        to: user.email,
+        subject: 'Password Reset',
+        html: `<p>You requested a password reset. Click <a href="${resetUrl}">here</a> to reset your password. This link will expire in 1 hour.</p>`,
+    };
+
+    return transporter.sendMail(mailOptions);
+};
+
+
