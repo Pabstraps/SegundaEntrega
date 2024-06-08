@@ -85,13 +85,43 @@ cartsController.createCart = async (req, res) => {
     }
 };
 
+// cartsController.addToCart = async (req, res) => {
+//     try {
+//         const productId = req.params.pid;
+//         let cart = await cartsModel.findOne();
+//         if (!cart) {
+//             cart = new cartsModel({ title: 'Cart' });
+//         }
+//         cart.products.push(productId);
+//         await cart.save();
+//         res.redirect('/views/cart');
+//     } catch (error) {
+//         console.error("Error al agregar producto al carrito:", error);
+//         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
+//     }
+// };
+
 cartsController.addToCart = async (req, res) => {
     try {
         const productId = req.params.pid;
-        let cart = await cartsModel.findOne();
-        if (!cart) {
-            cart = new cartsModel({ title: 'Cart' });
+        const user = req.user;
+
+        // Verificar si el producto existe y obtener el dueño del producto
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).send({ error: "Producto no encontrado" });
         }
+
+        // Verificar si el usuario premium intenta agregar su propio producto
+        if (user.role === 'premium' && product.owner === user.email) {
+            return res.status(400).send({ error: "No puedes agregar tu propio producto al carrito" });
+        }
+
+        let cart = await cartsModel.findOne({ user: user._id });
+        if (!cart) {
+            cart = new cartsModel({ title: 'Cart', user: user._id, products: [] });
+        }
+
         cart.products.push(productId);
         await cart.save();
         res.redirect('/views/cart');
@@ -100,7 +130,6 @@ cartsController.addToCart = async (req, res) => {
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
     }
 };
-
 
 
 

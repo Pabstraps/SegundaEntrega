@@ -15,9 +15,9 @@ productsMongoDAO.getAllProducts = async (page, limit) => {
     }
 };
 
-productsMongoDAO.createProduct = async ({ title, description, code, price, stock, category }) => {
+productsMongoDAO.createProduct = async ({ title, description, code, price, stock, category, owner  }) => {
     try {
-        const product = await productsModel.create({ title, description, code, price, stock, category });
+        const product = await productsModel.create({ title, description, code, price, stock, category, owner });
         return product;
     } catch (error) {
         throw new Error(`Error al crear el producto: ${error}`);

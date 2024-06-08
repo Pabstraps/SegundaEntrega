@@ -12,7 +12,10 @@ const productSchema = new mongoose.Schema({
         enum: ["software","hardware","accesories"],
     },
     owner: { 
-        type: String, default: 'admin' }
+        type: String, 
+        required: true,
+        default: 'admin'
+    }
 });
 
 productSchema.plugin(mongoosePaginate);

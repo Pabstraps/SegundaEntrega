@@ -47,11 +47,10 @@
 
 import productsRepository from '../repositories/productsRepository.js';
 import cartsModel from '../models/cart.model.js';
-import productsModel from '../models/product.model.js'
+import productsModel from '../models/product.model.js';
+import { checkProductOwnership } from '../services/middlewares/permissions.middleware.js';
 
 const productsController = {};
-
-
 
 productsController.getAllProducts = async (req, res) => {
     try {
@@ -62,7 +61,7 @@ productsController.getAllProducts = async (req, res) => {
         const nextPage = page < totalPages ? page + 1 : null;
         res.render('products', {
             status: "success",
-            products: products.map(product => product.toObject()), // Mapeamos los productos a objetos simples
+            products: products.map(product => product.toObject()),
             total_pages: totalPages,
             current_page: page,
             prev_page: prevPage,
@@ -75,7 +74,6 @@ productsController.getAllProducts = async (req, res) => {
         res.status(500).send({ error: "No se pudo obtener productos", message: error });
     }
 };
-
 
 productsController.getProductById = async (req, res) => {
     try {
@@ -92,20 +90,26 @@ productsController.getProductById = async (req, res) => {
 
 productsController.addToCart = async (req, res) => {
     try {
-        const { title, description, category, code, price, stock } = req.body;
+        const productId = req.params.pid;
+        const user = req.user;
 
-        // Reemplazar las comas en el precio y convertirlo a un número
-        const parsedPrice = parseFloat(price.replace(',', ''));
-
-        let cart = await cartsModel.findOne();
-        if (!cart) {
-            cart = new cartsModel({ title: 'Cart' });
+        const product = await productsModel.findById(productId);
+        if (!product) {
+            return res.status(404).send({ error: "Producto no encontrado" });
         }
 
-        const product = { title, description, category, code, price: parsedPrice, stock };
-        cart.products.push(product);
+        if (user.role === 'premium' && product.owner === user.email) {
+            return res.status(400).send({ error: "No puedes agregar tu propio producto al carrito" });
+        }
+
+        let cart = await cartsModel.findOne({ user: user._id });
+        if (!cart) {
+            cart = new cartsModel({ title: 'Cart', user: user._id, products: [] });
+        }
+
+        cart.products.push(productId);
         await cart.save();
-        res.redirect('/api/products'); 
+        res.redirect('/views/cart');
     } catch (error) {
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });
@@ -114,7 +118,7 @@ productsController.addToCart = async (req, res) => {
 
 productsController.getCart = async (req, res) => {
     try {
-        const cart = await cartsModel.findOne().populate('products');
+        const cart = await cartsModel.findOne({ user: req.user._id }).populate('products');
         if (!cart) {
             return res.render('cart', { products: [] });
         }
@@ -135,32 +139,25 @@ productsController.getCart = async (req, res) => {
     }
 };
 
-
-
-
-
-
-
-
-
-
-
 productsController.createProduct = async (req, res) => {
+    
     try {
         const { title, description, code, price, stock, category } = req.body;
-
+        const owner = req.user.email;
 
         if (!title || !price || !description || !code || !stock || !category) {
-            // Create Custom Error
             CustomError.createError({
                 name: "User Creation Error",
-                cause: generateProductErrorInfoESP (),
+                cause: generateProductErrorInfoESP(),
                 message: "Error tratando de crear el producto.",
                 code: EErrors.INVALID_TYPES_ERROR
-            })
+            });
+            return res.status(400).send({ error: "Faltan campos requeridos" });
         }
-
-        const product = await productsRepository.createProduct({ title, description, code, price, stock, category });
+        
+        const product = await productsRepository.createProduct({ title, description, code, price, stock, category, owner });
+        
+        console.log(`Producto creado por: ${owner}`);
         res.status(201).send({ status: "success", payload: product });
     } catch (error) {
         console.error("No se pudo crear el producto:", error);
@@ -168,7 +165,7 @@ productsController.createProduct = async (req, res) => {
     }
 };
 
-productsController.updateProduct = async (req, res) => {
+productsController.updateProduct = [checkProductOwnership, async (req, res) => {
     try {
         const productId = req.params.id;
         const { title, description, code, price, stock, category } = req.body;
@@ -181,9 +178,9 @@ productsController.updateProduct = async (req, res) => {
         console.error("No se pudo actualizar el producto:", error);
         res.status(500).send({ error: "No se pudo actualizar el producto", message: error });
     }
-};
+}];
 
-productsController.deleteProduct = async (req, res) => {
+productsController.deleteProduct = [checkProductOwnership, async (req, res) => {
     try {
         const productId = req.params.id;
         const deletedProduct = await productsRepository.deleteProduct(productId);
@@ -195,6 +192,7 @@ productsController.deleteProduct = async (req, res) => {
         console.error("No se pudo eliminar el producto:", error);
         res.status(500).send({ error: "No se pudo eliminar el producto", message: error });
     }
-};
+}];
 
 export default productsController;
+

@@ -3,15 +3,15 @@ import productsMongoController from '../controllers/products.controller.js';
 import productsFileSystemController from '../controllers/productsFileSystem.controller.js';
 import { isAdmin, isUser } from '../services/middlewares/auth.middleware.js';
 import productsController from '../controllers/products.controller.js';
-
+import { checkProductOwnership } from '../services/middlewares/permissions.middleware.js';
 
 const router = Router();
 
 // Rutas para MongoDB
 router.get('/', productsMongoController.getAllProducts);
 router.post('/', isAdmin, productsMongoController.createProduct);
-router.put('/:id', isAdmin, productsMongoController.updateProduct);
-router.delete('/:id', isAdmin, productsMongoController.deleteProduct);
+router.put('/:id', isAdmin, checkProductOwnership, productsMongoController.updateProduct);
+router.delete('/:id', isAdmin, checkProductOwnership, productsMongoController.deleteProduct,);
 router.post('/:pid/add-to-cart', productsController.addToCart);
 
 router.get('/cart', productsController.getCart); 

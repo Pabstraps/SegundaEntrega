@@ -9,6 +9,7 @@ productsRepository.getAllProducts = async (page, limit) => {
 };
 
 productsRepository.createProduct = async (productData) => {
+    console.log("Datos del producto en el repositorio:", productData); 
     return await productsMongoDAO.createProduct(productData);
 };
 

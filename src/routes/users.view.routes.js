@@ -1,6 +1,7 @@
 import { Router } from "express";
 import sessionsController from '../controllers/sessions.controller.js';
 import { requestPasswordReset } from "../controllers/sessions.controller.js";
+import { toggleUserRole } from "../controllers/user.rol.controller.js"
 
 const router = Router();
 
@@ -30,5 +31,7 @@ router.get("/logout", (req, res) => {
         res.send("Sesion cerrada correctamente.");
     });
 });
+
+router.post('/api/users/premium/:uid', toggleUserRole);
 
 export default router;
