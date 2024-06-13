@@ -125,6 +125,7 @@ cartsController.addToCart = async (req, res) => {
         cart.products.push(productId);
         await cart.save();
         res.redirect('/views/cart');
+        
     } catch (error) {
         console.error("Error al agregar producto al carrito:", error);
         res.status(500).send({ error: "Error al agregar producto al carrito", message: error });

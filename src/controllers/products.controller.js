@@ -91,9 +91,11 @@ productsController.getProductById = async (req, res) => {
 productsController.addToCart = async (req, res) => {
     try {
         const productId = req.params.pid;
-        const user = req.user;
+        const user = req.session.user;
 
         const product = await productsModel.findById(productId);
+        
+        
         if (!product) {
             return res.status(404).send({ error: "Producto no encontrado" });
         }
@@ -103,11 +105,12 @@ productsController.addToCart = async (req, res) => {
         }
 
         let cart = await cartsModel.findOne({ user: user._id });
+       
         if (!cart) {
             cart = new cartsModel({ title: 'Cart', user: user._id, products: [] });
         }
 
-        cart.products.push(productId);
+        cart.products.push(product);
         await cart.save();
         res.redirect('/views/cart');
     } catch (error) {
