@@ -43,8 +43,5 @@ router.post('/products/:pid/add-to-cart', async (req, res) => {
     }
 });
 
-router.get("/cart", (req, res) => {
-    res.render('cart')
-});
 
 export default router;

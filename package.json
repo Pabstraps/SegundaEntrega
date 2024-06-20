@@ -36,6 +36,8 @@
   },
   "devDependencies": {
     "chai": "^5.1.1",
+    "chai-http": "^5.0.0",
+    "esm": "^3.2.25",
     "mocha": "^10.4.0",
     "supertest": "^7.0.0"
   }

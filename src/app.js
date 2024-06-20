@@ -111,3 +111,4 @@ if (DB_TYPE === 'MONGO') {
     process.exit(1);
 }
 
+export default app;
