@@ -17,33 +17,33 @@ cartsController.getAllCarts = async (req, res) => {
 cartsController.purchase = async (req, res) => {
     try {
         const cartId = req.params.cid;
-        const cart = await cartsModel.findById(cartId).populate('products.product');
+        const cart = await cartsModel.findById(cartId).populate('products');
         console.log(cartId)
         if (!cart) {
             return res.status(404).json({ error: 'Carrito no encontrado' });
         }
 
         let totalAmount = 0;
-        const productsToUpdate = [];
-        const notPurchasedProducts = [];
+        // const productsToUpdate = [];
+        // const notPurchasedProducts = [];
 
-        for (const item of cart.products) {
-            const product = await Product.findById(item.product._id);
+        // // return console.log(cart)
+
+        // for (const item of cart.products) {
+        //     const product = await Product.findById(item._id);
             
-            if (!product || product.stock < item.quantity) {
-                notPurchasedProducts.push(item.product._id);
-            } else {
-                totalAmount += product.price * item.quantity;
-                productsToUpdate.push({
-                    productId: item.product._id,
-                    quantity: item.quantity,
-                });
-            }
-        }
+        //     if (!product) return 
+        //     totalAmount += product.price * item.quantity;
+        //     productsToUpdate.push({
+        //         productId: item._id,
+        //         quantity: item.quantity,
+        //     });
+        // }
 
-        for (const product of productsToUpdate) {
-            await Product.findByIdAndUpdate(product.productId, { $inc: { stock: -product.quantity } });
-        }
+        // for (const product of productsToUpdate) { 
+        //     console.log(product.quantity, "asdasd")
+        //     await Product.findByIdAndUpdate(product.productId, { $inc: { stock: -1 } });
+        // }
 
         const ticket = new Ticket({
             code: generateUniqueCode(),
@@ -55,7 +55,7 @@ cartsController.purchase = async (req, res) => {
         await ticket.save();
 
         if (notPurchasedProducts.length > 0) {
-            cart.products = cart.products.filter(item => !notPurchasedProducts.includes(item.product._id));
+            cart.products = cart.products.filter(item => !notPurchasedProducts.includes(item._id));
             await cart.save();
         } else {
             await cartsModel.findByIdAndDelete(cartId);
