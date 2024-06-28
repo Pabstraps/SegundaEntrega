@@ -30,7 +30,21 @@ const userSchema = new Schema({
         required: true,
         enum: ['user', 'premium', 'admin'],
         default: "user"
+    },
+    documents: [{
+        name: {
+            type: String,
+        },
+        reference:{
+            type: String
+        }
+    }],
+
+    last_connection: {
+        type: Date,
+        default: null
     }
+
 }, { timestamps: true });
 
 // Método para comparar contraseñas

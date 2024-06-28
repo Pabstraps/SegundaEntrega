@@ -98,6 +98,7 @@ import User from '../models/user.model.js';
 import { userDTO } from '../dtos/user.dto.js';
 import {sendPasswordResetEmail} from '../controllers/email.controller.js'
 import jwt from 'jsonwebtoken'
+import userService from '../services/user.service.js';
 
 
 const sessionsController = {};
@@ -135,11 +136,15 @@ sessionsController.successfulRegister = (req, res) => {
     res.status(201).send({ stauts: 'success', message: "Usuario creado de forma exitosa!!" })
 };
 
-sessionsController.successfulLogin = (req, res) => {
+sessionsController.successfulLogin = async (req, res) => {
     console.log("User found to login:");
     const user = req.user;
     console.log(user);
     if (!user) return res.status(401).send({ status: "error", error: "El usuario y la contraseña no coinciden!" });
+
+    user.last_connection = new Date();
+    await user.save();
+
     req.session.user = {
         name: `${user.first_name} ${user.last_name}`,
         email: user.email,
@@ -148,6 +153,20 @@ sessionsController.successfulLogin = (req, res) => {
     }
     res.send({ status: "success", payload: req.session.user, message: "¡Primer logueo realizado! :)" });
 };
+
+sessionsController.logout = async (req, res) => {
+    if (req.user) {
+        req.user.last_connection = new Date();
+        await req.user.save();
+    }
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
+        res.send({ status: "success", message: "Logout exitoso" });
+    });
+};
+
 
 sessionsController.failRegister = (req, res) => {
     res.status(401).send({ error: "Failed to process register!" });
@@ -165,6 +184,21 @@ sessionsController.currentUser = (req, res) => {
     const userToSend = userDTO(user);
     res.status(200).json({ user: userToSend });
   };
+
+
+  sessionsController.uploadDocuments = async (req, res) => {
+    try {
+        const userId = req.params.uid;
+        const files = req.files;
+        
+        const documents = await userService.uploadDocuments(userId, files);
+
+        res.send({ status: 'success', message: 'Documentos subidos exitosamente', documents });
+    } catch (error) {
+        console.error("Error al subir documentos:", error);
+        res.status(500).send({ error: "Error al subir documentos", message: error.message });
+    }
+};
 
 
 
